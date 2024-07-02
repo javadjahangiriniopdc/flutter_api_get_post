@@ -14,7 +14,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        inputDecorationTheme:
+            const InputDecorationTheme(border: OutlineInputBorder()),
+        colorScheme:
+            ColorScheme.fromSwatch(primarySwatch: Colors.blue).copyWith(
+          secondary: const Color(0xff16E5A7),
+        ),
         useMaterial3: true,
       ),
       home: const HomeScreen(),
@@ -29,10 +34,14 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text('Android Expert'),
+          title: const Text('Android Expert'),
         ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {},
+            onPressed: () {
+              Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => _AddStudentForm()));
+            },
             label: const Row(
               children: [Icon(Icons.add), Text('Add Student')],
             )),
@@ -54,6 +63,39 @@ class HomeScreen extends StatelessWidget {
             }
           },
         ));
+  }
+}
+
+class _AddStudentForm extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Add new Student '),
+      ),
+      body: const Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              decoration: InputDecoration(label: Text('First Name')),
+            ),
+            SizedBox(height: 8,),
+            TextField(
+              decoration: InputDecoration(label: Text('last Name')),
+            ),
+             SizedBox(height: 8,),
+            TextField(
+              decoration: InputDecoration(label: Text('course')),
+            ),
+             SizedBox(height: 8,),
+            TextField(
+              decoration: InputDecoration(label: Text('Score')),
+            )
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -125,7 +167,7 @@ class _Student extends StatelessWidget {
               ),
               Text(
                 data.score.toString(),
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               )
             ],
           )
