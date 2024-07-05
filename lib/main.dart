@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_api_get_post/data.dart';
 
@@ -27,9 +30,14 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,9 +46,13 @@ class HomeScreen extends StatelessWidget {
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         floatingActionButton: FloatingActionButton.extended(
-            onPressed: () {
-              Navigator.of(context).push(
+            onPressed: () async {
+             final result=await Navigator.of(context).push(
                   MaterialPageRoute(builder: (context) => _AddStudentForm()));
+                  setState(() {
+                    
+                  });
+                  
             },
             label: const Row(
               children: [Icon(Icons.add), Text('Add Student')],
@@ -50,6 +62,7 @@ class HomeScreen extends StatelessWidget {
           builder: (context, snapshot) {
             if (snapshot.hasData && snapshot.data != null) {
               return ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
                   itemCount: snapshot.data!.length,
                   itemBuilder: (context, index) {
                     return _Student(
@@ -67,30 +80,62 @@ class HomeScreen extends StatelessWidget {
 }
 
 class _AddStudentForm extends StatelessWidget {
+  final TextEditingController _firstnameController = TextEditingController();
+  final TextEditingController _lastnameController = TextEditingController();
+  final TextEditingController _courseController = TextEditingController();
+  final TextEditingController _scoreController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add new Student '),
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
+      floatingActionButton: FloatingActionButton.extended(
+          onPressed: () async {
+            try {
+              final newStudentData = await saveStudent(
+                  _firstnameController.text,
+                  _lastnameController.text,
+                  _courseController.text,
+                  int.parse(_scoreController.text));
+              Navigator.pop(context, newStudentData);
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+          },
+          label: const Row(
+            children: [Icon(Icons.check), Text('save')],
+          )),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TextField(
-              decoration: InputDecoration(label: Text('First Name')),
+              controller: _firstnameController,
+              decoration: const InputDecoration(label: Text('First Name')),
             ),
-            SizedBox(height: 8,),
-            TextField(
-              decoration: InputDecoration(label: Text('last Name')),
+            const SizedBox(
+              height: 8,
             ),
-             SizedBox(height: 8,),
             TextField(
-              decoration: InputDecoration(label: Text('course')),
+              controller: _lastnameController,
+              decoration: const InputDecoration(label: Text('last Name')),
             ),
-             SizedBox(height: 8,),
+            const SizedBox(
+              height: 8,
+            ),
             TextField(
-              decoration: InputDecoration(label: Text('Score')),
+              controller: _courseController,
+              decoration: const InputDecoration(label: Text('course')),
+            ),
+            const SizedBox(
+              height: 8,
+            ),
+            TextField(
+              controller: _scoreController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(label: Text('Score')),
             )
           ],
         ),
@@ -174,5 +219,20 @@ class _Student extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+Future<StudentData> saveStudent(
+    String firstName, String lastName, String course, int score) async {
+  final response = await MyHttpClient.dio.post('experts/student', data: {
+    'first_name': firstName,
+    'last_name': lastName,
+    'course': course,
+    'score': score
+  });
+  if (response.statusCode == 200) {
+    return StudentData.formJson(response.data);
+  } else {
+    throw Exception();
   }
 }
