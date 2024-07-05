@@ -32,6 +32,9 @@ Future<List<StudentData>> getStudents() async{
       students.add(StudentData.formJson(element));
     });
   }
+  
+  // Sort students by id in descending order
+  students.sort((a, b) => b.id.compareTo(a.id));
   print(students.toString());
   return students;
 }
